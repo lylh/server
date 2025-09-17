@@ -89,7 +89,7 @@ async function match(id, source, data) {
 
 		audioDataArr = audioDataArr.map((result) => result.value);
 		audioData = audioDataArr.reduce((a, b) => (a.br >= b.br ? a : b));
-	} else if (process.env.FOLLOW_SOURCE_ORDER) {
+	} else if (true) { // 强制按音源优先级顺序选择
 		for (let i = 0; i < candidate.length; i++) {
 			const source = candidate[i];
 			try {

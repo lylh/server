@@ -1,9 +1,10 @@
-const DEFAULT_SOURCE = ['kugou', 'kuwo', 'migu', 'ytdlp'];
+const DEFAULT_SOURCE = ['toubiec', 'kugou', 'kuwo', 'migu', 'ytdlp'];
 const PROVIDERS = {
 	qq: require('./provider/qq'),
 	kugou: require('./provider/kugou'),
 	kuwo: require('./provider/kuwo'),
 	migu: require('./provider/migu'),
+	toubiec: require('./provider/toubiec'),
 	joox: require('./provider/joox'),
 	youtube: require('./provider/youtube'),
 	youtubedl: require('./provider/youtube-dl'),

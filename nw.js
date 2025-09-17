@@ -1,9 +1,17 @@
+/*
+ * @Author: Paner luh1@xiaopeng.com
+ * @Date: 2025-09-17 15:36:29
+ * @LastEditors: Paner luh1@xiaopeng.com
+ * @LastEditTime: 2025-09-17 16:15:52
+ * @FilePath: \UnblockNeteaseMusic\nw.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 const Service = require('node-windows').Service;
 
 const svc = new Service({
 	name: 'unblock-netease-cloud-music',
 	description: '点亮网易云音乐灰色歌曲',
-	script: './app.js', // 入口文件路径
+	script: './src/app.js', // 入口文件路径
 	// scriptOptions:'-p 52100:52101', // 可选参数示例: 自定义端口并开启HTTPS
 	// scriptOptions: '-o qq', // 可选参数
 	wait: '1', // 程序崩溃后重启时间间隔

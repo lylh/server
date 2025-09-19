@@ -71,7 +71,7 @@ const getSingleQuality = async (id, level) => {
  */
 const track = async (id) => {
 	// 按音质优先级尝试获取URL
-	const qualityOrder = ['jymaster', 'jyeffect', 'jysky', 'standard'];
+	const qualityOrder = ['lossless','hires', 'jymaster', 'jyeffect', 'jysky', 'standard'];
 
 	for (const level of qualityOrder) {
 		const result = await getSingleQuality(id, level);

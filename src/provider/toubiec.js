@@ -14,9 +14,10 @@ const QUALITY_LEVELS = {
 
 // 请求头配置
 const headers = {
-	accept: '*/*',
+	'accept': '*/*',
 	'accept-language': 'zh-CN,zh;q=0.9',
-	referer: 'https://api.toubiec.cn/wyapi/Song.html',
+	'origin': 'https://wyapi.toubiec.cn',
+	'referer': 'https://wyapi.toubiec.cn/',
 	'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
 	'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
 	'sec-ch-ua-mobile': '?0',
@@ -33,12 +34,20 @@ const headers = {
  * @returns {Promise<string>} 音乐URL
  */
 const getSingleQuality = async (id, level) => {
-	const url = `https://api.toubiec.cn/wyapi/getMusicUrl.php?id=${id}&level=${level}`;
+	const url = 'https://wyapi.toubiec.cn/api/music/url';
+	const payload = {
+        id: id,
+        level: level,
+    };
+    const postHeaders = {
+        ...headers,
+        'Content-Type': 'application/json'
+    };
 
 	try {
 		logger.debug({ id, level }, 'Requesting music URL from toubiec API');
 
-		const response = await request('GET', url, headers);
+		const response = await request('POST', url, postHeaders, JSON.stringify(payload));
 		const jsonBody = await response.json();
 
 		logger.debug({ jsonBody }, 'Received response from toubiec API');
@@ -54,7 +63,9 @@ const getSingleQuality = async (id, level) => {
 					level: audioData.level || level
 				};
 			}
-		}
+		} else if (jsonBody.code === 404) {
+            logger.warn({ id, level, msg: jsonBody.msg }, 'toubiec API returned 404');
+        }
 
 		logger.debug({ id, level }, 'No valid URL found in response');
 		return null;

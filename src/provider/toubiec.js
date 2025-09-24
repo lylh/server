@@ -47,13 +47,13 @@ const getSingleQuality = async (id, level) => {
     };
 
 	try {
-		logger.debug({ id, level, isRetry }, 'Requesting music URL from toubiec API');
+		logger.debug({ id, level }, 'Requesting music URL from toubiec API');
 
 		const response = await request('POST', url, postHeaders, JSON.stringify(payload));
 		const jsonBody = await response.json();
-
+		logger.debug({ jsonBody }, 'Received response from toubiec API');
 		// 检查HTTP状态码
-		if (response.statusCode === 403 && !isRetry) {
+		if (response.statusCode === 403 ) {
 			logger.warn({ id, level, status: response.statusCode }, 'Received HTTP 403 error, attempting to use response cookie and retry');
 
 			// 直接从403响应中获取cookie
@@ -67,7 +67,7 @@ const getSingleQuality = async (id, level) => {
 					'cookie': Array.isArray(setCookieHeader) ? setCookieHeader.join('; ') : setCookieHeader
 				};
 
-				const retryResponse = await request('GET', url, newHeaders);
+				const retryResponse = await request('POST', url, newHeaders,JSON.stringify(payload));
 
 				// 检查重试响应的状态码
 				if (retryResponse.statusCode !== 200) {
@@ -112,66 +112,6 @@ const getSingleQuality = async (id, level) => {
 		// 检查响应状态码
 		if (response.statusCode !== 200) {
 			logger.error({ id, level, status: response.statusCode }, `Request returned HTTP ${response.statusCode}`);
-			return null;
-		}
-
-		const jsonBody = await response.json();
-		logger.debug({ jsonBody }, 'Received response from toubiec API');
-
-		// 处理API响应中的403错误码
-		if (jsonBody.code === 403 && !isRetry) {
-			logger.warn({ id, level, code: jsonBody.code }, 'Received API 403 error, attempting to use response cookie and retry');
-
-			// 直接从403响应中获取cookie
-			const setCookieHeader = response.headers['set-cookie'];
-			if (setCookieHeader) {
-				logger.debug('Found cookie in 403 response, retrying with cookie');
-
-				// 使用获取到的cookie重新请求
-				const newHeaders = {
-					...headers,
-					'cookie': Array.isArray(setCookieHeader) ? setCookieHeader.join('; ') : setCookieHeader
-				};
-
-				const retryResponse = await request('GET', url, newHeaders);
-
-				// 检查重试响应的状态码
-				if (retryResponse.statusCode !== 200) {
-					logger.error({ id, level, status: retryResponse.statusCode }, `Retry request returned HTTP ${retryResponse.statusCode}`);
-					return null;
-				}
-
-				const retryJsonBody = await retryResponse.json();
-
-				logger.debug({ retryJsonBody }, 'Received retry response from toubiec API');
-
-				if (retryJsonBody.code === 200 && retryJsonBody.data && retryJsonBody.data.length > 0) {
-					const audioData = retryJsonBody.data[0];
-					if (audioData.url && audioData.url.trim() !== '') {
-						logger.info({ id, level }, 'Successfully got music URL after API 403 retry');
-						return {
-							url: audioData.url,
-							br: audioData.br || null,
-							size: audioData.size || null,
-							md5: audioData.md5 || null,
-							level: audioData.level || level
-						};
-					}
-				} else if (retryJsonBody.code !== 200) {
-					// 记录重试后的其他错误码
-					logger.error({
-						id,
-						level,
-						code: retryJsonBody.code,
-						message: retryJsonBody.message || 'Unknown error',
-						response: retryJsonBody
-					}, `Retry request failed with code ${retryJsonBody.code}`);
-				}
-			} else {
-				logger.warn({ id, level }, 'No cookie found in 403 response headers');
-			}
-
-			logger.error({ id, level }, 'Failed to resolve API 403 error after retry');
 			return null;
 		}
 
